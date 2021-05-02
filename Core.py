@@ -1,15 +1,22 @@
 
+from Process import Process
+
 class Core:
 
-    def __init__(self, id, clockSpeed, cacheSize_B = 32, processSize_nm = 180, noOfProccesses= 1):
+    def __init__(self, id, clockSpeed = 3, cacheSize_B = 32, processSize_nm = 180):
         self.id = id
         self.clockSpeed = clockSpeed
         self.cacheSize_KB = cacheSize_B #cache size in bytes
         self.processSize_nm = processSize_nm
-        self.cache = [0]*cacheSize_B  #cache data structure
-        self.noOfProccesses = noOfProccesses
+        self.cache = [0]*cacheSize_B    #cache data structure
+        self.processList = []
         
 
+    def createProcess(self):
+        self.processList.append(Process(len(self.processList)), "load 1")
+
+    def killProcess(self, pid):
+        del self.processList[pid]
 
 
     def fetch(self, proccessID):
@@ -40,3 +47,6 @@ class Core:
         Store: The CPU must give feedback after executing an instruction, 
         and the output data is written to the memory.
         '''
+
+    def displayProcesses(self):
+        print(self.processList)
