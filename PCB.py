@@ -1,7 +1,7 @@
 
 
 class PCB:
-    def __init__(self,  pointer, processState, processNo, priority):
+    def __init__(self,  processNo, priority=1, pointer =0, processState = 'r'):
         self.pointer = pointer
         self.counter = 0
         self.processState = processState

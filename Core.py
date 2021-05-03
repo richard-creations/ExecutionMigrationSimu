@@ -3,17 +3,23 @@ from Process import Process
 
 class Core:
 
-    def __init__(self, id, clockSpeed = 3, cacheSize_B = 32, processSize_nm = 180):
+    def __init__(self, id, cacheSize_B = 32, processSize_nm = 180):
         self.id = id
-        self.clockSpeed = clockSpeed
         self.cacheSize_KB = cacheSize_B #cache size in bytes
         self.processSize_nm = processSize_nm
         self.cache = [0]*cacheSize_B    #cache data structure
         self.processList = []
+        self.currentExecution = -1
         
+    def status(self):
+        output = "CORE ID: " + str(self.id) + "\n"
+        output += "Number of proccesses: " + str(len(self.processList)) + "\n"
+        output += "Current Proccess Execution: " + str(self.currentExecution) + "\n"
+        return output
+
 
     def createProcess(self):
-        self.processList.append(Process(len(self.processList)), "load 1")
+        self.processList.append(Process(len(self.processList), "load 1"))
 
     def killProcess(self, pid):
         del self.processList[pid]
