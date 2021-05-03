@@ -12,7 +12,7 @@ def main():
 
     elif cacheSize.isdigit():
         cSize = int(cacheSize)
-        for coreID in range(noOfCores, cSize):
+        for coreID in range(noOfCores):
             cores.append(Core(coreID, cSize))
 
 
