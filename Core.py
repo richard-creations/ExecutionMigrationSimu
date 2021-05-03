@@ -8,7 +8,7 @@ class Core:
         self.L1cacheSize_KB = cacheSize_B #cache size in bytes
         self.processSize_nm = processSize_nm
         self.L1cache = [0]*cacheSize_B    #cache data structure
-        self.processList = []
+        self.affinity = []
         self.currentExecution = -1
         self.CLOCK = 0
         

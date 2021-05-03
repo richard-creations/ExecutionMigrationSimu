@@ -4,6 +4,7 @@ import Process as Process
 class CPU:
 
     def __init__(self, noOfCores=4, L1CacheSize = '32', L2cacheSize = 32):
+        self.CLOCK = 0
         self.noOfCores = noOfCores
         self.L1cacheSize = L1CacheSize
         self.L2cacheSize = L2cacheSize
