@@ -1,4 +1,7 @@
-
+'''
+PCB Block contains information about the context of a proccess. When the scheduler switches to run another process
+the conexte of the last running context is aved here to resume execution effectively later
+'''
 
 class PCB:
     def __init__(self,  processNo, priority=1, pointer =0, processState = 'r'):
