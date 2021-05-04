@@ -31,15 +31,18 @@ class MasterCPU:
                 self.affinity[coreID] = set()
         
     def fork(self, parentID = 0, exe = "load 1001", verbose=False):
-        pid = len(self.processList)
-        self.processList.append(Process(pid, exe, parentID, self.CLOCK))
-        if verbose is True:
-            print(f"Process with PID {pid} created.")
-        nextNode = self.nextAvailableNode()
-        self.affinity[nextNode].add(pid)
-        self.assignProc(pid, nextNode)
-        if verbose is True:
-            print(f"Process with PID {pid} assigned to core {nextNode}.")
+        try:
+            pid = len(self.processList)
+            self.processList.append(Process(pid, exe, parentID, self.CLOCK))
+            if verbose is True:
+                print(f"Process with PID {pid} created.")
+            nextNode = self.nextAvailableNode()
+            self.affinity[nextNode].add(pid)
+            self.assignProc(pid, nextNode)
+            if verbose is True:
+                print(f"Process with PID {pid} assigned to core {nextNode}.")
+        except:
+            print("ERR: Process creation failed.")
         self.CLOCK +=1
 
     def assignProc(self, pid, coreID):
@@ -48,29 +51,38 @@ class MasterCPU:
 
     #EXECUTION MIGRATION IMPLEMENTATION HERE---------
     def fetchDataFromRAM(self, pid, addr):
+        '''
+          SIMULATES THE MOVING OF DATA FROM MAIN MEMORY TO L1 Caches
+        '''
         randdata = random.randint(1,256)
         coreID = self.getProccessHome(pid)
-        #SIMULATESTHE DATA HAS BEEN SAVED IN appropriate L1_CACHE of affinity core
         tag = int(addr[0:5], 2)
         set = addr[4:6]
         offset = addr[6:12]
         self.cores[coreID].L1cache[tag] = [addr, "{:08b}".format(randdata) * 64]
-        
-
-    def getProccessHome(self, pid):
-         for coreID in range(self.noOfCores):
-            if pid in self.affinity[coreID]:
-                return coreID
 
     def executionMigration(self, startCore, destCore, pid):
+        '''
+        Migrates a thread to another core
+        '''
         self.affinity[startCore].remove(pid)
         self.cores[startCore].affinity.remove(pid)
         self.affinity[destCore].add(pid)
-        self.cores[destCore].affinity.add(pid)
-        
+        self.cores[destCore].affinity.add(pid)   
 
-    #This will return the core which the address is stored in the L1 cache
+    def getProccessHome(self, pid):
+        '''
+        Retrieves the core with affinity to the pid
+        '''
+        for coreID in range(self.noOfCores):
+            if pid in self.affinity[coreID]:
+                return coreID
+        return -1
+
     def getCore(self, addr):
+        '''
+        This will return the core which the address is stored in the L1 cache
+        '''
         tag = int(addr[0:5], 2)
         for core in self.cores:
             if core.L1cache[tag][0] == addr:
@@ -78,22 +90,31 @@ class MasterCPU:
         return -1
 
 
-    #This is the cost of execution migration, moving from the process from the
-    #start node to destination node to use the data
-    #PCBsize is a fixed processblocksize
+
     def getMigrationCost(self, start, dest):
+        '''
+        This is the cost of execution migration, moving from the process from the
+        start node to destination node to use the data
+        PCBsize is a fixed processblocksize
+        '''
         PCBsize = self.cores[start].PCB_size #128
         migrCost = abs(dest - start) * PCBsize
         return migrCost
 
-    #This is the access cost of fetching the data from another core and doing a round trip back
-    #access is usually 32 bit or 64 bit so it is constant
+
     def getAccessCost(self, start, dest):
+        '''
+        This is the access cost of fetching the data from another core and doing a round trip back
+        access is usually 32 bit or 64 bit so it is constant
+        '''
         accessCost = abs(dest - start) * 64 * 2 #because of round trip it is twice as long
         return accessCost
 
 
     def kill(self, pid):
+        '''
+        Kills a proccess
+        '''
         del self.processList[pid]
         coreID = self.getProccessHome(pid) 
         self.cores[coreID].affinity.remove(pid)
