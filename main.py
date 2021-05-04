@@ -55,7 +55,8 @@ def main():
     ASSUMPTIONS:
     - Fixed data access size in cache
     - Fixed context size or Process Control Block
-    - Fine Grained Hardware execution
+    - Fine Grained Hardware granularity
+    - Optimized hardware for execution migration wgich reduces the number of cycles
     - Ignoring Data-Bus and hardware congestions
 
 
@@ -68,11 +69,8 @@ def main():
     Simulation number is the number of tests you want to run.
 
     K is how many instructions to look agead for as in real life scenarios proccesses do not typically run out.
-
-    
-
-
     '''
+
 
     simulate()
 
@@ -93,7 +91,7 @@ def simulate(verbose = False):
     print(f"SimNo\tOPT\tnoMigr\t noAccess")
     for sim_num in range(simTotal):
         if verbose is True:
-            print("preparing simulation memory accesses and cache data...")
+            print("preparing simulation memory accesses..")
             print()
         numCreations = 50
         created = list()
@@ -101,7 +99,7 @@ def simulate(verbose = False):
         accesses = [] * numAccesses
         testPID = 1
     
-
+        #CREATES THE DATA IN L1 CACHE IN RANDOM PROCCESSES
         for i in range(numCreations):
             pid = random.randint(0, (noOfCores * 4) - 1) #process that created it
             memAddr = "{:012b}".format(random.randint(1, 4096)) #RAM memory address to fetch
@@ -142,7 +140,7 @@ def simulate(verbose = False):
 '''
 base case: if i == last access to look ahead: break
 
-SUBPROBLEM: Every next acccess is a sub problem
+SUBPROBLEM: Every next acccess instruction is a sub problem
 
 recursive case:  return min(OPT(k, i + 1, core, access) + cpu.getAccessCost(core, destCore), 
                 OPT(k, i + 1, destCore, access) + cpu.getMigrationCost(core, destCore)), if cache miss
