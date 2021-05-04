@@ -7,7 +7,7 @@ class Process:
         self.programCount = 0
         self.context = PCB(pid)
         self.code = exe
-        self.time = time
+        self.timeOfCreation = time
         self.globVars = []
         self.heap = []
         self.stack = []
