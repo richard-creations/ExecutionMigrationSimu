@@ -1,0 +1,4 @@
+access, p1, 01010000
+create, p2, 01000100
+acess, p3, 01010100
+create, p3, 10010110

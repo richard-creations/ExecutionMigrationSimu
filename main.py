@@ -43,6 +43,9 @@ def main():
     Advantage of remote access:
         - If there are not too many subsequent remote accesses, it would be cheaper to fetch from another cores cache.
 
+    if the thread context is small compared to the data that would otherwise be transferred it would be better to migrate
+    thread.
+    
     getCost(): 
     '''
     print("preparing simulation memory accesses and cache data...")
