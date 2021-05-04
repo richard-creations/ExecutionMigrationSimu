@@ -22,28 +22,29 @@ class MasterCPU:
         if not L1CacheSize.isdigit():    
             for coreID in range(int(self.noOfCores)):
                 self.cores.append( Core(coreID) )
-                self.affinity[coreID] = []
+                self.affinity[coreID] = set()
 
         elif L1CacheSize.isdigit():
             cSize = int(self.L1CacheSize)
             for coreID in range(noOfCores):
                 self.cores.append(Core(coreID, cSize))
-                self.affinity[coreID] = []
-        print(self.affinity)
+                self.affinity[coreID] = set()
         
-    def fork(self, parentID = 0, exe = "load 1001"):
+    def fork(self, parentID = 0, exe = "load 1001", verbose=False):
         pid = len(self.processList)
         self.processList.append(Process(pid, exe, parentID, self.CLOCK))
-        print(f"Process with PID {pid} created.")
+        if verbose is True:
+            print(f"Process with PID {pid} created.")
         nextNode = self.nextAvailableNode()
-        self.affinity[nextNode].append(pid)
+        self.affinity[nextNode].add(pid)
         self.assignProc(pid, nextNode)
-        print(f"Process with PID {pid} assigned to core {nextNode}.")
+        if verbose is True:
+            print(f"Process with PID {pid} assigned to core {nextNode}.")
         self.CLOCK +=1
 
     def assignProc(self, pid, coreID):
-        self.cores[coreID].affinity.append(pid)
-        self.cores[coreID].procs.append(self.processList[pid])
+        self.cores[coreID].affinity.add(pid)
+        self.cores[coreID].procs.add(self.processList[pid])
 
     #EXECUTION MIGRATION IMPLEMENTATION HERE---------
     def fetchDataFromRAM(self, pid, addr):
@@ -61,36 +62,42 @@ class MasterCPU:
             if pid in self.affinity[coreID]:
                 return coreID
 
-    def executionMigration(self, startCore, destCore, process):
-        return
+    def executionMigration(self, startCore, destCore, pid):
+        self.affinity[startCore].remove(pid)
+        self.cores[startCore].affinity.remove(pid)
+        self.affinity[destCore].add(pid)
+        self.cores[destCore].affinity.add(pid)
+        
 
-    #This will return the core which the address is located in it's cache
+    #This will return the core which the address is stored in the L1 cache
     def getCore(self, addr):
         tag = int(addr[0:5], 2)
         for core in self.cores:
             if core.L1cache[tag][0] == addr:
                 return core.id
+        return -1
+
 
     #This is the cost of execution migration, moving from the process from the
     #start node to destination node to use the data
     #PCBsize is a fixed processblocksize
     def getMigrationCost(self, start, dest):
-        PCBsize = self.cores[start].PCB_size
+        PCBsize = self.cores[start].PCB_size #128
         migrCost = abs(dest - start) * PCBsize
         return migrCost
 
     #This is the access cost of fetching the data from another core and doing a round trip back
     #access is usually 32 bit or 64 bit so it is constant
     def getAccessCost(self, start, dest):
-        accessCost = (abs(dest - start)) * 2 * 64 #because of round trip it is twice as long
+        accessCost = abs(dest - start) * 64 * 2 #because of round trip it is twice as long
         return accessCost
 
 
     def kill(self, pid):
         del self.processList[pid]
         coreID = self.getProccessHome(pid) 
-        del self.cores[coreID].affinity[pid]
-        del self.affinity[pid]
+        self.cores[coreID].affinity.remove(pid)
+        self.affinity.remove(pid)
         print(f"pid {pid} killed.")
         self.CLOCK +=1
 
